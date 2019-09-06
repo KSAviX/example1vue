@@ -13,15 +13,15 @@
                   <v-text-field v-model="search" append-icon="search" label="Поиск по сотруднику" single-line hide-details/>
                 </v-col>
               </v-row>
-              <v-row>
+              <v-row> 
                 <v-col>
-                  <v-checkbox v-model="showFired" label="Показать уволенных" color="#388e3c"/>
+                  <v-checkbox hide-details v-model="showFired" label="Показать уволенных" color="#388e3c"/>
                 </v-col>
                 <v-col>
-                  <v-btn color="#a5d6a7" width="75%">Принять на должность</v-btn>
+                  <v-btn color="#a5d6a7">Принять на должность</v-btn>
                 </v-col>
                 <v-col>
-                  <v-btn :disabled="selected.length === 0" color="#ff8b81" width="75%">Снять с {{selected.length > 1 ? 'должностей' : 'должности'}}</v-btn>
+                  <v-btn :disabled="selected.length === 0" color="#ff8b81">Снять с {{selected.length > 1 ? 'должностей' : 'должности '}}</v-btn>
                 </v-col>
               </v-row>
             </v-container>
@@ -40,60 +40,60 @@
         <td>{{ item.name }}</td>
         <td>{{ item.companyName }}</td>
         <td>{{ item.positionName }}</td>
-        <td>{{ item.hireDate }}</td>
-        <td>{{ item.fireDate }}</td>
+        <td>{{ formatDate(item.hireDate, 'DD.MM.YYYY') }}</td>
+        <td align="center">{{ formatDate(item.fireDate, 'DD.MM.YYYY') }}</td>
         <td>
-          <v-menu v-if="item.fireDate === null" :value ="salaryEditIndex === index" top right :close-on-content-click="false" class="v-small-dialog">
+          <v-menu v-if="item.fireDate === null" v-model="salaryEdit[index]" top right origin="top right" :close-on-content-click="false" content-class="v-small-dialog__menu-content" class="v-small-dialog">
             <template v-slot:activator="{ on }">
               <div class="v-small-dialog__activator">
                 <span class="v-small-dialog__activator__content" @click="editItem(item)">{{ item.salary }}₽ ({{ item.fraction }}%)</span>
               </div>
             </template>
-            <v-card>
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col>Ставка, руб</v-col>
-                    <v-col>Ставка, %</v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col>
-                      <v-text-field v-model="salaryEditData.salary" type="number" color="#a5d6a7" label="Введите число" single-line counter/>
-                    </v-col>
-                    <v-col>
-                      <v-text-field v-model="salaryEditData.fraction" type="number " color="#a5d6a7" label="Введите число" single-line counter/>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card-text>
-              <v-card-actions>
-                <v-btn @click="close">Отмена</v-btn>
-                <v-btn @click="save">Сохранить</v-btn>
-              </v-card-actions>
-            </v-card>
+            <v-container>
+              <v-row>
+                <v-col>Ставка, руб</v-col>
+                <v-col>Ставка, %</v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-text-field v-model="salaryEditData.salary" type="number" color="#a5d6a7" label="Введите число" single-line/>
+                </v-col>
+                <v-col>
+                  <v-text-field v-model="salaryEditData.fraction" type="number" color="#a5d6a7" label="Введите число" single-line/>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col align="center">
+                  <v-btn @click="close" color="#388e3c" text>Отмена</v-btn>
+                </v-col>
+                <v-col align="center">
+                  <v-btn @click="save" color="#388e3c" text>Сохранить</v-btn>           
+                </v-col>
+              </v-row>
+            </v-container>
           </v-menu>
           <span v-if="item.fireDate !== null">{{ item.salary }}₽ ({{ item.fraction }}%)</span>
         </td>
-        <td>
+        <td align="center">
           <v-edit-dialog v-if="item.fireDate === null" large cancel-text="Отмена" save-text="Сохранить" :return-value.sync="item.base">
             {{ item.base }}
             <template v-slot:input>
-              <v-text-field v-model="item.base" type="number" label="Введите число" single-line counter/>
+              <v-text-field v-model="item.base" type="number" label="Введите число" single-line/>
             </template>
           </v-edit-dialog>
           <span v-if="item.fireDate !== null">{{ item.base }}</span>
         </td>
-        <td>
+        <td align="center">
           <v-edit-dialog v-if="item.fireDate === null" large cancel-text="Отмена" save-text="Сохранить" :return-value.sync="item.advance">
             {{ item.advance }}
             <template v-slot:input>
-              <v-text-field v-model="item.advance" type="number" label="Введите число" single-line counter/>
+              <v-text-field v-model="item.advance" type="number" label="Введите число" single-line/>
             </template>
           </v-edit-dialog>
           <span v-if="item.fireDate !== null">{{ item.advance }}</span>
         </td>
-        <td>
-          <v-checkbox v-model="item.byHours" :disabled="item.fireDate !== null" color="#388e3c"/>
+        <td align="center">
+          <v-simple-checkbox v-model="item.byHours" :disabled="item.fireDate !== null" color="#388e3c"/>
         </td>
       </tr>
     </template>
@@ -101,17 +101,20 @@
 </template>
 
 <script>
+  const moment = require('moment')
+
   export default {
     data() {
       return {
         search: '',
         showFired: true,
+        salaryEdit: [],
         salaryEditData: {},
         salaryEditIndex: -1,
         selected: [],
         headers: [{
             text: 'Сотрудник',
-			value: 'name',
+            value: 'name',
           },
           {
             text: 'Компания',
@@ -126,7 +129,7 @@
             value: 'hireDate'
           },
           {
-            text: 'Дата уольнения',
+            text: 'Дата увольнения',
             value: 'fireDate',
             filter: value => {
               if (value === null) return true
@@ -258,9 +261,10 @@
       editItem(item) {
         this.salaryEditData = Object.assign({}, item)
         this.salaryEditIndex = this.items.indexOf(item)
+        this.salaryEdit[this.salaryEditIndex] = true
       },
       close() {
-        this.salaryEditIndex = -1
+        this.salaryEdit[this.salaryEditIndex] = false
         this.salaryEditData = {}
       },
       save() {
@@ -269,6 +273,9 @@
         }
         this.close()
       },
+      formatDate(date, format) {
+        return date ? moment(date).format(format) : '';
+      }
     },
     computed: {
       allSelected: function() {
