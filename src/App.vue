@@ -1,5 +1,5 @@
 <template>
-  <v-data-table v-model="selected" :headers="headers" :search="search" :custom-filter="customFilter" :items="items" item-key="name" show-select>
+  <v-data-table v-on:current-items="onCurrentItemsChanged" v-model="selected" :headers="headers" :search="search" :custom-filter="customFilter" :items="items" item-key="name" show-select>
     <template v-slot:top>
       <v-container>
         <v-row>
@@ -21,7 +21,7 @@
                   <v-btn color="#a5d6a7">Принять на должность</v-btn>
                 </v-col>
                 <v-col>
-                  <v-btn :disabled="selected.length === 0" color="#ff8b81">Снять с {{selected.length > 1 ? 'должностей' : 'должности '}}</v-btn>
+                  <v-btn :disabled="selected.length === 0" color="#ff8b81">Снять с {{selected.length > 1 ? 'должностей' : 'должности'}}</v-btn>
                 </v-col>
               </v-row>
             </v-container>
@@ -129,7 +129,7 @@
             value: 'hireDate'
           },
           {
-            text: 'Дата увольнения',
+            text: 'Дата уольнения',
             value: 'fireDate',
             filter: value => {
               if (value === null) return true
@@ -242,21 +242,20 @@
     },
     methods: {
       customFilter(value, search, item) {
-        return search != null &&
+        return search !== null &&
           item.name.indexOf(search) !== -1
       },
       selectAll() {
-        let maxCount = this.items.filter(x => x.fireDate == null).length
-        if (this.selected.length === maxCount) {
+        if (this.selected.length === this.selectMaxCount) {
           this.selected = []
         } else {
           this.selected = []
-          for (let i in this.items) {
-            if (this.items[i].fireDate == null) {
-              this.selected.push(this.items[i])
-            }
-          }
+          this.items.filter(this.applyFilter).forEach(x => this.selected.push(x))
         }
+      },
+      applyFilter(item) {
+        return (this.search === null || item.name.indexOf(this.search) !== -1) &&
+          item.fireDate === null
       },
       editItem(item) {
         this.salaryEditData = Object.assign({}, item)
@@ -275,16 +274,20 @@
       },
       formatDate(date, format) {
         return date ? moment(date).format(format) : '';
+      },
+      onCurrentItemsChanged(items) {
+        this.selected = this.selected.filter(x => items.indexOf(x) !== -1)
       }
     },
     computed: {
       allSelected: function() {
-        let maxCount = this.items.filter(x => x.fireDate == null).length
-        return this.selected.length === maxCount
+        return this.selected.length > 0 && this.selected.length === this.selectMaxCount
       },
       partSelected: function() {
-        let maxCount = this.items.filter(x => x.fireDate == null).length
-        return this.selected.length > 0 && this.selected.length !== maxCount
+        return this.selected.length > 0 && this.selected.length !== this.selectMaxCount
+      },
+      selectMaxCount: function() {
+        return this.items.filter(this.applyFilter).length
       }
     }
   }
