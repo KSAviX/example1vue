@@ -15,7 +15,9 @@
               </v-row>
               <v-row> 
                 <v-col>
+                  <div class="v-input--selection-controls">
                   <v-checkbox hide-details v-model="showFired" label="Показать уволенных" color="#388e3c"/>
+                  </div>
                 </v-col>
                 <v-col>
                   <v-btn color="#a5d6a7">Принять на должность</v-btn>
@@ -92,8 +94,8 @@
           </v-edit-dialog>
           <span v-if="item.fireDate !== null">{{ item.advance }}</span>
         </td>
-        <td align="center">
-          <v-simple-checkbox v-model="item.byHours" :disabled="item.fireDate !== null" color="#388e3c"/>
+        <td align="center">          
+          <v-simple-checkbox v-model="item.byHours" :disabled="item.fireDate !== null" color="#388e3c"/>          
         </td>
       </tr>
     </template>
@@ -292,3 +294,9 @@
     }
   }
 </script>
+<style lang="css" scoped>
+.v-input--selection-controls {
+    margin-top: 10px;
+    padding-top: 0px;
+}
+</style>
