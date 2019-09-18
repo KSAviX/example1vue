@@ -1,6 +1,6 @@
 <template>
-  <v-data-table v-on:current-items="onCurrentItemsChanged" v-model="selected" :headers="headers" :search="search" :custom-filter="customFilter" :items="items" item-key="name" show-select>
-    <template v-slot:top>
+<v-app>
+      <template>
       <v-container>
         <v-row>
           <v-col>
@@ -14,10 +14,9 @@
                 </v-col>
               </v-row>
               <v-row> 
+                <v-spacer/>
                 <v-col>
-                  <div class="v-input--selection-controls">
-                  <v-checkbox hide-details v-model="showFired" label="Показать уволенных" color="#388e3c"/>
-                  </div>
+                  <v-checkbox hide-details v-model="showFired" label="Показать уволенных" color="#388e3c" class="my-auto"/>                  
                 </v-col>
                 <v-col>
                   <v-btn color="#a5d6a7">Принять на должность</v-btn>
@@ -31,11 +30,12 @@
         </v-row>
       </v-container>
     </template>
+  <v-data-table v-on:current-items="onCurrentItemsChanged" v-model="selected" :headers="headers" :search="search" :custom-filter="customFilter" :items="items" item-key="name" show-select class="elevation-1">
     <template v-slot:header.data-table-select>
       <v-simple-checkbox :value="allSelected" :indeterminate="partSelected" @input="selectAll"/>
     </template>
     <template v-slot:item="{ index, item, isSelected, select}">
-      <tr v-bind:style="{ backgroundColor: item.fireDate !== null ? '#ff8b81' : 'white' }">
+      <tr v-bind:style="{backgroundColor: item.fireDate !== null ? '#ff8b81' : 'white' }">
         <td>
           <v-simple-checkbox v-if="item.fireDate === null" :value="isSelected" @input="select($event)"/>
         </td>
@@ -43,7 +43,7 @@
         <td>{{ item.companyName }}</td>
         <td>{{ item.positionName }}</td>
         <td>{{ formatDate(item.hireDate, 'DD.MM.YYYY') }}</td>
-        <td align="center">{{ formatDate(item.fireDate, 'DD.MM.YYYY') }}</td>
+        <td>{{ formatDate(item.fireDate, 'DD.MM.YYYY') }}</td>
         <td>
           <v-menu v-if="item.fireDate === null" v-model="salaryEdit[index]" top right origin="top right" :close-on-content-click="false" content-class="v-small-dialog__menu-content" class="v-small-dialog">
             <template v-slot:activator="{ on }">
@@ -65,10 +65,10 @@
                 </v-col>
               </v-row>
               <v-row>
-                <v-col align="center">
+                <v-col>
                   <v-btn @click="close" color="#388e3c" text>Отмена</v-btn>
                 </v-col>
-                <v-col align="center">
+                <v-col>
                   <v-btn @click="save" color="#388e3c" text>Сохранить</v-btn>           
                 </v-col>
               </v-row>
@@ -76,7 +76,7 @@
           </v-menu>
           <span v-if="item.fireDate !== null">{{ item.salary }}₽ ({{ item.fraction }}%)</span>
         </td>
-        <td align="center">
+        <td>
           <v-edit-dialog v-if="item.fireDate === null" large cancel-text="Отмена" save-text="Сохранить" :return-value.sync="item.base">
             {{ item.base }}
             <template v-slot:input>
@@ -85,7 +85,7 @@
           </v-edit-dialog>
           <span v-if="item.fireDate !== null">{{ item.base }}</span>
         </td>
-        <td align="center">
+        <td>
           <v-edit-dialog v-if="item.fireDate === null" large cancel-text="Отмена" save-text="Сохранить" :return-value.sync="item.advance">
             {{ item.advance }}
             <template v-slot:input>
@@ -94,12 +94,13 @@
           </v-edit-dialog>
           <span v-if="item.fireDate !== null">{{ item.advance }}</span>
         </td>
-        <td align="center">          
+        <td>          
           <v-simple-checkbox v-model="item.byHours" :disabled="item.fireDate !== null" color="#388e3c"/>          
         </td>
       </tr>
     </template>
   </v-data-table>
+  </v-app>
 </template>
 
 <script>
@@ -116,7 +117,7 @@
         selected: [],
         headers: [{
             text: 'Сотрудник',
-            value: 'name',
+            value: 'name'
           },
           {
             text: 'Компания',
@@ -131,7 +132,7 @@
             value: 'hireDate'
           },
           {
-            text: 'Дата уольнения',
+            text: 'Дата увольнения',
             value: 'fireDate',
             filter: value => {
               if (value === null) return true
@@ -294,9 +295,3 @@
     }
   }
 </script>
-<style lang="css" scoped>
-.v-input--selection-controls {
-    margin-top: 10px;
-    padding-top: 0px;
-}
-</style>
